@@ -151,7 +151,7 @@ router.get("/detail/:url", async (req, res) => {
           const title = $(data).find("a").text().trim();
           const href = $(data).find("a").attr("href");
           const date = $(data).find(".chapter-link-time").text().trim();
-          chapter.push({ title, href: href.substring(28, href.length), date });
+          chapter.push({ title, href: href.substring(30, href.length), date });
         });
 
       element
@@ -188,25 +188,20 @@ router.get("/popular", async (req, res) => {
     const komikList = [];
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
-      const element = $(".mainholder > #content");
-      let title, href, rating, thumbnail, lastchapter;
+      const element = $("#content > .wrapper > #sidebar");
       element
-        .find(".wrapper > .hotslid > .bixbox.hothome.full > .listupd > .bs")
+        .find(".section > .widget-post > .serieslist.pop > ul > li")
         .each((i, data) => {
-          href = $(data).find(".bsx > a").attr("href");
-          thumbnail = $(data).find(".bsx > a > .limit > img").attr("src");
-          title = $(data).find(".bsx > a > .bigor > .tt").text().trim();
-          lastchapter = $(data)
-            .find(".bsx > a > .bigor > .adds > .epxs")
-            .text()
-            .trim();
-          rating = $(data)
-            .find(".bsx > a > .bigor > .adds > .rt > .rating > .numscore")
-            .text()
-            .trim();
-          href = href.substring(27, href.length);
-          komikList.push({ title, href, rating, thumbnail, lastchapter });
+          const title = $(data).find(".leftseries > h2 > a").text().trim();
+          const thumbnail = $(data).find(".imgseries > a > img").attr("src");
+          const href = $(data).find(".imgseries > a").attr("href");
+          komikList.push({
+            title,
+            href: href.substring(28, href.length),
+            thumbnail,
+          });
         });
+
       return responseApi(res, 200, "success", komikList);
     }
     return responseApi(res, response.status, "failed");
@@ -221,59 +216,43 @@ router.get("/recommended", async (req, res) => {
     const response = await AxiosService(baseUrl);
     let komikList = [];
     if (response.status === 200) {
-      let title, href, rating, type, genre, description, thumbnail;
       const $ = cheerio.load(response.data);
-      const element = $(".mainholder");
-      element
-        .find(".big-slider > .swiper-wrapper > .swiper-slide")
-        .each((i, data) => {
-          href = $(data).find("a").attr("href");
-          title = $(data)
-            .find(
-              "a > .mainslider > .limit > .sliderinfo > .sliderinfolimit > span.name"
-            )
-            .text()
-            .trim();
-          rating = $(data)
-            .find(
-              "a > .mainslider > .limit > .sliderinfo > .sliderinfolimit > .meta > span.quality"
-            )
-            .text()
-            .trim();
-          type = $(data)
-            .find(
-              "a > .mainslider > .limit > .sliderinfo > .sliderinfolimit > .meta > span.text > b"
-            )
-            .text()
-            .trim();
-          genre = $(data)
-            .find(
-              "a > .mainslider > .limit > .sliderinfo > .sliderinfolimit > .meta > span.text:nth-child(3)"
-            )
-            .text()
-            .trim();
-          description = $(data)
-            .find(
-              "a > .mainslider > .limit > .sliderinfo > .sliderinfolimit > .desc > p"
-            )
-            .text()
-            .trim();
+      const element = $(
+        "#content > .wrapper > .bixbox > .listupd > .swiper > .swiper-wrapper > .swiper-slide"
+      );
 
-          thumbnail = $(data)
-            .find("a > .mainslider > .limit > .bigbanner")
-            .attr("style")
-            .match(/'(.*)'/)[1];
-          href = href.substring(27, href.length);
-          komikList.push({
-            title,
-            href,
-            rating,
-            type,
-            genre,
-            description,
-            thumbnail,
-          });
+      element.each((i, data) => {
+        const title = $(data)
+          .find("a > .splide__slide-info > .title")
+          .text()
+          .trim();
+        const rating = $(data)
+          .find(
+            "a > .splide__slide-info > .other > .rate > .rating > .numscore"
+          )
+          .text()
+          .trim();
+        const chapter = $(data)
+          .find("a > .splide__slide-info > .other > .chapter")
+          .text()
+          .trim();
+        const type = $(data)
+          .find("a > .splide__slide-image  > .type")
+          .text()
+          .trim();
+        const href = $(data).find("a").attr("href");
+        const thumbnail = $(data)
+          .find("a > .splide__slide-image > img")
+          .attr("src");
+        komikList.push({
+          title,
+          href: href.substring(28, href.length),
+          rating,
+          chapter,
+          type,
+          thumbnail,
         });
+      });
       return responseApi(res, 200, "success", komikList);
     }
     return responseApi(res, response.status, "failed");

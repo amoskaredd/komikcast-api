@@ -1,8 +1,8 @@
 {
-  "name": "asurascan-scrapping",
+  "name": "komikcast-scrapping",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "engines": {
     "node": "14.18.3",
     "npm": "6.14.15"
