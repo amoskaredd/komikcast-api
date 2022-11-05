@@ -81,7 +81,7 @@ router.get("/genre", async (req, res) => {
   }
 });
 
-router.get("/baca/:url", async (req, res) => {
+router.get("/read/:url", async (req, res) => {
   try {
     const response = await AxiosService(`${baseUrl}/${req.params.url}`);
     const komikList = [];
@@ -338,5 +338,7 @@ router.get("/recommended", async (req, res) => {
     return responseApi(res, 500, "failed");
   }
 });
+
+router.all("*", (req, res) => responseApi(res, 404, "route not found"));
 
 module.exports = { router };
