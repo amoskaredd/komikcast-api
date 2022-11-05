@@ -169,14 +169,7 @@ router.get("/detail/:url", async (req, res) => {
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
       const element = $("#content > .wrapper > .komik_info");
-      let title,
-        thumbnail,
-        description,
-        status,
-        type,
-        released,
-        author,
-        posted_by;
+      let title, thumbnail, description, status, type, released, author;
       const chapter = [];
       const genre = [];
 
@@ -214,7 +207,7 @@ router.get("/detail/:url", async (req, res) => {
 
       description = element
         .find(
-          ".komik_info-body > .komik_info-description > .komik_info-description-sinopsis > div > div:nth-child(1) > p"
+          ".komik_info-body > .komik_info-description > .komik_info-description-sinopsis > p"
         )
         .text()
         .trim();
@@ -241,10 +234,10 @@ router.get("/detail/:url", async (req, res) => {
 
       komikList.push({
         title,
-        status,
-        type,
-        released,
-        author,
+        status:status.substring(8,status.length),
+        type:type.substring(6,type.length),
+        released:released.substring(10,released.length),
+        author:author.substring(8,author.length),
         genre,
         description,
         thumbnail,
