@@ -234,10 +234,10 @@ router.get("/detail/:url", async (req, res) => {
 
       komikList.push({
         title,
-        status:status.substring(8,status.length),
-        type:type.substring(6,type.length),
-        released:released.substring(10,released.length),
-        author:author.substring(8,author.length),
+        status: status.substring(8, status.length),
+        type: type.substring(6, type.length),
+        released: released.substring(10, released.length),
+        author: author.substring(8, author.length),
         genre,
         description,
         thumbnail,
@@ -263,11 +263,23 @@ router.get("/popular", async (req, res) => {
         .find(".section > .widget-post > .serieslist.pop > ul > li")
         .each((i, data) => {
           const title = $(data).find(".leftseries > h2 > a").text().trim();
+
+          const year = $(data)
+          .find(".leftseries > span:nth-child(3)")
+          .text()
+          .trim();
+
+          const genre = $(data)
+            .find(".leftseries > span:nth-child(2)")
+            .text()
+            .trim();
           const thumbnail = $(data).find(".imgseries > a > img").attr("src");
           const href = $(data).find(".imgseries > a").attr("href");
           komikList.push({
             title,
             href: href.substring(28, href.length),
+            genre:genre.substring(7,genre.length),
+            year,
             thumbnail,
           });
         });
