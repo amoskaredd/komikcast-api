@@ -4,6 +4,14 @@ const { AxiosService } = require("./helper/axios_service");
 const { responseApi } = require("./helper/response_api");
 const baseUrl = "https://komikcast.site";
 
+router.get("/", (req, res) => {
+  return res.status(200).json({
+    status: "success",
+    message:
+      "Welcome, see https://github.com/Al-Ghozy03/komikcast-api for documentation",
+  });
+});
+
 router.get("/genre/:url", async (req, res) => {
   try {
     const response = await AxiosService(`${baseUrl}/genres/${req.params.url}`);
