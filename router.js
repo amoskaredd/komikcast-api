@@ -4,6 +4,75 @@ const { AxiosService } = require("./helper/axios_service");
 const { responseApi } = require("./helper/response_api");
 const baseUrl = "https://komikcast.site";
 
+router.get("/genre/:url", async (req, res) => {
+  try {
+    const response = await AxiosService(`${baseUrl}/genres/${req.params.url}`);
+    if (response.status === 200) {
+      const $ = cheerio.load(response.data);
+      const element = $("#content > .wrapper > .postbody > .bixbox");
+      const komikList = [];
+
+      element
+        .find(
+          ".listupd > .list-update_items > .list-update_items-wrapper > .list-update_item"
+        )
+        .each((i, data) => {
+          const title = $(data)
+            .find("a > .list-update_item-info > h3")
+            .text()
+            .trim();
+          const last_chapter = $(data)
+            .find("a > .list-update_item-info > .other > .chapter")
+            .text()
+            .trim();
+          const type = $(data)
+            .find("a > .list-update_item-image > .type")
+            .text()
+            .trim();
+          const thumbnail = $(data)
+            .find("a > .list-update_item-image > img")
+            .attr("src");
+          const href = $(data).find("a").attr("href");
+
+          komikList.push({
+            title,
+            last_chapter,
+            type,
+            href: href.substring(28, href.length),
+            thumbnail,
+          });
+        });
+      return responseApi(res, response.status, "success", komikList);
+    }
+
+    return responseApi(res, response.status, "failed");
+  } catch (er) {
+    console.log(er);
+    return responseApi(res, 500, "failed");
+  }
+});
+
+router.get("/genre", async (req, res) => {
+  try {
+    const response = await AxiosService(baseUrl);
+    if (response.status === 200) {
+      const $ = cheerio.load(response.data);
+      const element = $("#content > .wrapper");
+      const komikList = [];
+      element.find("#sidebar > .section > ul.genre > li").each((i, data) => {
+        const title = $(data).find("a").text().trim();
+        const href = $(data).find("a").attr("href");
+        komikList.push({ title, href: href.substring(29, href.length) });
+      });
+      return responseApi(res, 200, "success", komikList);
+    }
+    return responseApi(res, response.status, "failed");
+  } catch (er) {
+    console.log(er);
+    return responseApi(res, 500, "failed");
+  }
+});
+
 router.get("/baca/:url", async (req, res) => {
   try {
     const response = await AxiosService(`${baseUrl}/${req.params.url}`);
