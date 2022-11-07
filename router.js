@@ -243,7 +243,7 @@ router.get("/detail/:url", async (req, res) => {
         thumbnail,
         chapter,
       });
-      return responseApi(res, 200, "success", komikList);
+      return responseApi(res, 200, "success", komikList[0]);
     }
     return responseApi(res, response.status, "failed");
   } catch (er) {
