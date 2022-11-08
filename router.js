@@ -229,7 +229,12 @@ router.get("/detail/:url", async (req, res) => {
           ".komik_info-body > .komik_info-content > .komik_info-content-body > .komik_info-content-genre > a"
         )
         .each((i, data) => {
-          genre.push($(data).text().trim());
+          genre.push({
+            genre: $(data).text().trim(),
+            href: $(data)
+              .attr("href")
+              .substring(29, $(data).attr("href").length),
+          });
         });
 
       komikList.push({
@@ -265,9 +270,9 @@ router.get("/popular", async (req, res) => {
           const title = $(data).find(".leftseries > h2 > a").text().trim();
 
           const year = $(data)
-          .find(".leftseries > span:nth-child(3)")
-          .text()
-          .trim();
+            .find(".leftseries > span:nth-child(3)")
+            .text()
+            .trim();
 
           const genre = $(data)
             .find(".leftseries > span:nth-child(2)")
@@ -278,7 +283,7 @@ router.get("/popular", async (req, res) => {
           komikList.push({
             title,
             href: href.substring(28, href.length),
-            genre:genre.substring(7,genre.length),
+            genre: genre.substring(7, genre.length),
             year,
             thumbnail,
           });
