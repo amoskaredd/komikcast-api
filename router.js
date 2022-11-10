@@ -4,6 +4,39 @@ const { AxiosService } = require("./helper/axios_service");
 const { responseApi } = require("./helper/response_api");
 const baseUrl = "https://komikcast.site";
 
+router.get("/terbaru", async (req, res) => {
+  const response = await AxiosService(baseUrl);
+  if (response.status === 200) {
+    const komikList = [];
+    const $ = cheerio.load(response.data);
+    const element = $("#content  >.wrapper > .postbody");
+
+    element.find(".bixbox > .listupd > .utao").each((i, data) => {
+      const href = $(data).find(".uta > .imgu > a").attr("href");
+      const thumbnail = $(data).find(".uta > .imgu > a > img").attr("src");
+      const title = $(data).find(".uta > .luf > a > h3").text().trim();
+      const last_chapter = $(data)
+        .find(".uta > .luf > ul > li:nth-child(1) > a")
+        .text()
+        .trim();
+      const update_at = $(data)
+        .find(".uta > .luf > ul > li:nth-child(1) > span > i")
+        .text()
+        .trim();
+      komikList.push({
+        title,
+        thumbnail,
+        href: href.substring(28, href.length),
+        last_chapter,
+        update_at,
+      });
+    });
+
+    return responseApi(res, 200, "success", komikList);
+  }
+  return responseApi(res, response.status, "failed");
+});
+
 router.get("/", (req, res) => {
   return res.status(200).json({
     status: "success",
