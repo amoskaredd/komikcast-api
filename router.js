@@ -5,34 +5,114 @@ const { responseApi } = require("./helper/response_api");
 const baseUrl = "https://komikcast.site";
 
 router.get("/terbaru", async (req, res) => {
-  const response = await AxiosService(baseUrl);
+  const { page } = req.query;
+  const response = await AxiosService(`${baseUrl}/project-list/page/${page}`);
   if (response.status === 200) {
     const komikList = [];
     const $ = cheerio.load(response.data);
-    const element = $("#content  >.wrapper > .postbody");
+    const element = $("#content  >.wrapper > .postbody > .bixbox");
 
-    element.find(".bixbox > .listupd > .utao").each((i, data) => {
-      const href = $(data).find(".uta > .imgu > a").attr("href");
-      const thumbnail = $(data).find(".uta > .imgu > a > img").attr("src");
-      const title = $(data).find(".uta > .luf > a > h3").text().trim();
-      const last_chapter = $(data)
-        .find(".uta > .luf > ul > li:nth-child(1) > a")
+    const current_page = element
+      .find(".pagination > .page-numbers.current")
+      .text()
+      .trim();
+
+    let length_page;
+    if (
+      element.find(".pagination > .page-numbers:nth-child(6)").attr("class") ===
+      "next page-numbers"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(5)")
         .text()
         .trim();
-      const update_at = $(data)
-        .find(".uta > .luf > ul > li:nth-child(1) > span > i")
+    } else if (
+      element.find(".pagination > .page-numbers:nth-child(8)").attr("class") ===
+      "next page-numbers"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(7)")
         .text()
         .trim();
-      komikList.push({
-        title,
-        thumbnail,
-        href: href.substring(28, href.length),
-        last_chapter,
-        update_at,
+    } else if (
+      element.find(".pagination > .page-numbers:nth-child(9)").attr("class") ===
+      "next page-numbers"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(8)")
+        .text()
+        .trim();
+    } else if (
+      element
+        .find(".pagination > .page-numbers:nth-child(10)")
+        .attr("class") === "next page-numbers"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(9)")
+        .text()
+        .trim();
+    } else if (
+      element
+        .find(".pagination > .page-numbers:nth-child(11)")
+        .attr("class") === "next page-numbers"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(10)")
+        .text()
+        .trim();
+    } else if (
+      element.find(".pagination > .page-numbers:nth-child(6)").attr("class") ===
+      "page-numbers current"
+    ) {
+      length_page = element
+        .find(".pagination > .page-numbers:nth-child(6)")
+        .text()
+        .trim();
+    }
+
+    element
+      .find(
+        ".list-update_items > .list-update_items-wrapper > .list-update_item"
+      )
+      .each((i, data) => {
+        const thumbnail = $(data)
+          .find("a > .list-update_item-image > img")
+          .attr("src");
+        const href = $(data).find("a").attr("href");
+        const type = $(data)
+          .find("a > .list-update_item-image > .type")
+          .text()
+          .trim();
+        const title = $(data)
+          .find("a > .list-update_item-info > h3")
+          .text()
+          .trim();
+        const last_chapter = $(data)
+          .find("a > .list-update_item-info > .other > .chapter")
+          .text()
+          .trim();
+        const rating = $(data)
+          .find(
+            "a > .list-update_item-info > .other > .rate > .rating  >.numscore"
+          )
+          .text()
+          .trim();
+        komikList.push({
+          title,
+          href: href.substring(28, href.length),
+          thumbnail,
+          type,
+          last_chapter,
+          rating,
+        });
       });
-    });
 
-    return responseApi(res, 200, "success", komikList);
+    return res.status(200).json({
+      status: "success",
+      current_page: parseFloat(current_page),
+      length_page: parseFloat(length_page),
+      data: komikList,
+    });
   }
   return responseApi(res, response.status, "failed");
 });
@@ -202,10 +282,16 @@ router.get("/detail/:url", async (req, res) => {
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
       const element = $("#content > .wrapper > .komik_info");
-      let title, thumbnail, description, status, type, released, author;
+      let title, thumbnail, description, status, type, released, author,rating;
       const chapter = [];
       const genre = [];
 
+      rating = element
+        .find(
+          ".komik_info-body > .komik_info-content > .komik_info-content-rating > .komik_info-content-rating-bungkus > .data-rating > strong"
+        )
+        .text()
+        .trim();
       title = element
         .find(
           ".komik_info-body > .komik_info-content > .komik_info-content-body > h1"
@@ -272,6 +358,7 @@ router.get("/detail/:url", async (req, res) => {
 
       komikList.push({
         title,
+        rating:rating.replace("Rating ",""),
         status: status.substring(8, status.length),
         type: type.substring(6, type.length),
         released: released.substring(10, released.length),
