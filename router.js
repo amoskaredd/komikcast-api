@@ -6,6 +6,7 @@ const baseUrl = "https://komikcast.site";
 
 router.get("/terbaru", async (req, res) => {
   const { page } = req.query;
+  if (page === undefined) return responseApi(res, 500, "page is required");
   const response = await AxiosService(`${baseUrl}/project-list/page/${page}`);
   if (response.status === 200) {
     const komikList = [];
@@ -127,11 +128,95 @@ router.get("/", (req, res) => {
 
 router.get("/genre/:url", async (req, res) => {
   try {
-    const response = await AxiosService(`${baseUrl}/genres/${req.params.url}`);
+    const { page } = req.query;
+    if (page === undefined) return responseApi(res, 500, "page is required");
+    const response = await AxiosService(
+      `${baseUrl}/genres/${req.params.url}/page/${page}`
+    );
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
       const element = $("#content > .wrapper > .postbody > .bixbox");
       const komikList = [];
+
+      const checkPagination = element
+        .find(".listupd > .list-update_items > .pagination > .current")
+        .text()
+        .trim();
+
+      let length_page;
+      if (
+        element
+          .find(".pagination > .page-numbers:nth-child(6)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(5)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(8)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(7)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(9)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(8)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(10)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(9)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(11)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(10)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(4)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(3)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(3)")
+          .attr("class") === "next page-numbers"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(2)")
+          .text()
+          .trim();
+      } else if (
+        element
+          .find(".pagination > .page-numbers:nth-child(6)")
+          .attr("class") === "page-numbers current"
+      ) {
+        length_page = element
+          .find(".pagination > .page-numbers:nth-child(6)")
+          .text()
+          .trim();
+      }
 
       element
         .find(
@@ -163,7 +248,12 @@ router.get("/genre/:url", async (req, res) => {
             thumbnail,
           });
         });
-      return responseApi(res, response.status, "success", komikList);
+      return res.status(200).json({
+        status: "success",
+        current_page: checkPagination === "" ? 1 : parseInt(checkPagination),
+        length_page: checkPagination === "" ? 1 : parseFloat(length_page),
+        data: komikList,
+      });
     }
 
     return responseApi(res, response.status, "failed");
@@ -282,7 +372,7 @@ router.get("/detail/:url", async (req, res) => {
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
       const element = $("#content > .wrapper > .komik_info");
-      let title, thumbnail, description, status, type, released, author,rating;
+      let title, thumbnail, description, status, type, released, author, rating;
       const chapter = [];
       const genre = [];
 
@@ -358,7 +448,7 @@ router.get("/detail/:url", async (req, res) => {
 
       komikList.push({
         title,
-        rating:rating.replace("Rating ",""),
+        rating: rating.replace("Rating ", ""),
         status: status.substring(8, status.length),
         type: type.substring(6, type.length),
         released: released.substring(10, released.length),
