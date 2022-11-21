@@ -250,6 +250,7 @@ router.get("/genre/:url", async (req, res) => {
             last_chapter,
             type,
             href: href.substring(28, href.length),
+            rating,
             thumbnail,
           });
         });
