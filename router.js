@@ -237,7 +237,12 @@ router.get("/genre/:url", async (req, res) => {
             .trim();
           const thumbnail = $(data)
             .find("a > .list-update_item-image > img")
+            .attr
+            ("src");
+          const rating = $(data)
+            .find("a > .list-update_item-info > .other > .rate > .rating > .numscore")
             .attr("src");
+
           const href = $(data).find("a").attr("href");
 
           komikList.push({
