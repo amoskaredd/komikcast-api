@@ -88,7 +88,7 @@ router.get("/terbaru", async (req, res) => {
           .find("a > .list-update_item-info > h3")
           .text()
           .trim();
-        const last_chapter = $(data)
+        const chapter = $(data)
           .find("a > .list-update_item-info > .other > .chapter")
           .text()
           .trim();
@@ -103,7 +103,7 @@ router.get("/terbaru", async (req, res) => {
           href: href.substring(28, href.length),
           thumbnail,
           type,
-          last_chapter,
+          chapter,
           rating,
         });
       });
@@ -227,7 +227,7 @@ router.get("/genre/:url", async (req, res) => {
             .find("a > .list-update_item-info > h3")
             .text()
             .trim();
-          const last_chapter = $(data)
+          const chapter = $(data)
             .find("a > .list-update_item-info > .other > .chapter")
             .text()
             .trim();
@@ -248,7 +248,7 @@ router.get("/genre/:url", async (req, res) => {
 
           komikList.push({
             title,
-            last_chapter,
+            chapter,
             type,
             href: href.substring(28, href.length),
             rating,
@@ -327,7 +327,7 @@ router.get("/search", async (req, res) => {
       const element = $(
         "#content > .wrapper > .postbody > .dev > #main > .list-update"
       );
-      let title, href, thumbnail, type, last_chapter, rating;
+      let title, href, thumbnail, type, chapter, rating;
 
       element
         .find(
@@ -346,7 +346,7 @@ router.get("/search", async (req, res) => {
             )
             .text()
             .trim();
-          last_chapter = $(data)
+          chapter = $(data)
             .find("a > .list-update_item-info > .other > .chapter")
             .text()
             .trim();
@@ -356,7 +356,7 @@ router.get("/search", async (req, res) => {
           komikList.push({
             title,
             type,
-            last_chapter,
+            chapter,
             rating,
             href: href.substring(28, href.length),
             thumbnail,
@@ -446,7 +446,7 @@ router.get("/detail/:url", async (req, res) => {
         )
         .each((i, data) => {
           genre.push({
-            genre: $(data).text().trim(),
+            title: $(data).text().trim(),
             href: $(data)
               .attr("href")
               .substring(29, $(data).attr("href").length),
